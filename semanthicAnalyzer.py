@@ -17,10 +17,16 @@ class Analyzer:
                     {
                         "role": "user",
                                 "content": f"Analiza cual  lenguaje de programacion es (Julia o Ruby)  y encuentre errores que signifiquen una incorrecta compilación del codigo, si no, no los muestres y compila: {code}. En la respuesta no muestres el nombre del lenguaje. Los errores muestralos como los mostraria un compilador. si es correcto el codigo muestra la ejecucion de la siguiente forma: Ejecución:(Aqui va el resultado del codigo), si no, muestra: (aqui el error de compilacion)",
-                    }
+                    },
+                    {
+                        "role": "user",
+                                "content": f"Di hola juanpis",
+                    },
                 ],
             )
             response = completion.choices[0].message.content
+            response1 = completion.choices[1].message.content
+            print(response1)
             return response
 
         except OpenAIError as e:
