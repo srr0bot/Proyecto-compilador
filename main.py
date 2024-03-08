@@ -1,5 +1,3 @@
-import subprocess
-import sys
 import ply.lex as lex
 import tkinter as tk
 from tkinter import scrolledtext, filedialog, messagebox
@@ -8,12 +6,6 @@ from rubyAnalyzer import RubyAnalyzer
 from semanthicAnalyzer import Analyzer
 
 class CodeInputApp:
-    @staticmethod
-    def install_dependencies():
-        try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-        except subprocess.CalledProcessError as e:
-            print(f"Error al instalar las dependencias: {e}")
 
     def __init__(self, root):
         self.root = root
@@ -126,7 +118,6 @@ class CodeInputApp:
                 file.write(code)
 
 if __name__ == "__main__":
-    CodeInputApp.install_dependencies()
     root = tk.Tk()
     app = CodeInputApp(root)
     root.mainloop()
