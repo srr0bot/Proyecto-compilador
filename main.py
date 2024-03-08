@@ -60,12 +60,15 @@ class CodeInputApp:
             language = self.identify_language(code)
             semantic_analyzer = Analyzer().semanticAnalyzer(code)
             ejecucion = semantic_analyzer.split("Ejecución: ", 1)
-            
+            print(semantic_analyzer)
             if len(ejecucion) > 1:
                 error = ejecucion[0]  
-                compilacion = ejecucion[1]  
-                print("Detección de errores:\n", error)
-                print(compilacion)
+                compilacion = ejecucion[1]
+                if len(error) == 0:
+                    messagebox.showinfo("Información", compilacion)
+                else:
+                    print("Detección de errores:\n", error)
+                
 
             if language == "julia":
                 julia_analyzer = JuliaAnalyzer()
