@@ -2,6 +2,7 @@ import ply.lex as lex
 import tkinter as tk
 from tkinter import scrolledtext, filedialog, messagebox
 from juliaAnalyzer import JuliaAnalyzer
+from rubyAnalyzer import RubyAnalyzer
 from semanthicAnalyzer import Analyzer
 import subprocess
 import sys
@@ -62,7 +63,9 @@ class CodeInputApp:
                 analyzed_tokens = julia_analyzer.analyze_code(code)
                 result = f"Tokens reconocidos:\n{analyzed_tokens}"
             elif language == "ruby":
-                result = self.analyze_ruby_code(code)
+                ruby_analyzer = RubyAnalyzer()
+                analyzed_tokens = ruby_analyzer.analyze_code(code)
+                result = f"Tokens reconocidos:\n{analyzed_tokens}"
             else:
                 result = "Lenguaje no identificado."
 
