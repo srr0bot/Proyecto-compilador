@@ -16,7 +16,7 @@ class Analyzer:
                 messages=[
                     {
                         "role": "user",
-                                "content": f"Analiza cual  lenguaje de programacion es (Julia o Ruby)  y encuentra errores: {code}. Los errores muestralos como los mostraria el compilador nativo. si es correcto el codigo muestra la ejecucion",
+                                "content": f"Analiza cual  lenguaje de programacion es (Julia o Ruby)  y encuentre errores que signifiquen una incorrecta compilación del codigo, si no, no los muestres y compila: {code}. En la respuesta no muestres el nombre del lenguaje. Los errores muestralos como los mostraria un compilador. si es correcto el codigo muestra la ejecucion de la siguiente forma: Ejecución: (Aqui va el resultado del codigo), si no muestra: Error de compilación",
                     }
                 ],
             )
