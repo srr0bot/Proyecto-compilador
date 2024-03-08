@@ -1,19 +1,20 @@
+import subprocess
+import sys
 import ply.lex as lex
 import tkinter as tk
 from tkinter import scrolledtext, filedialog, messagebox
 from juliaAnalyzer import JuliaAnalyzer
 from rubyAnalyzer import RubyAnalyzer
 from semanthicAnalyzer import Analyzer
-import subprocess
-import sys
 
 class CodeInputApp:
+    @staticmethod
     def install_dependencies():
         try:
             subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-        except subprocess.CalledProcessError:
-            print("error")
-    
+        except subprocess.CalledProcessError as e:
+            print(f"Error al instalar las dependencias: {e}")
+
     def __init__(self, root):
         self.root = root
         self.root.title("Editor de Código")
@@ -31,6 +32,7 @@ class CodeInputApp:
 
         self.code_input = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=40, height=20)
         self.code_input.grid(row=0, column=0, padx=10, pady=10)
+        self.code_input.bind("<KeyRelease>", self.update_button_and_count)
 
         self.run_button = tk.Button(root, text="Ejecutar Código", command=self.execute_code, state=tk.DISABLED)
         self.run_button.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky=tk.W + tk.E)
@@ -42,8 +44,17 @@ class CodeInputApp:
         self.character_count_label = tk.Label(root, text="Número de caracteres: 0")
         self.character_count_label.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
 
-        self.update_character_count()
-        self.update_run_button_state()
+        self.update_button_and_count()
+
+    def update_button_and_count(self, event=None):
+        code = self.code_input.get("1.0", tk.END)
+        character_count = len(code) - 1  # Restar 1 para excluir el último carácter que es una nueva línea
+        self.character_count_label.config(text=f"Número de caracteres: {character_count}")
+
+        if 50 <= character_count <= 500:
+            self.run_button.config(state=tk.NORMAL)
+        else:
+            self.run_button.config(state=tk.DISABLED)
 
     def execute_code(self):
         code = self.code_input.get("1.0", tk.END)
@@ -55,8 +66,8 @@ class CodeInputApp:
             self.console_output.delete("1.0", tk.END)
 
             language = self.identify_language(code)
-            semanticAnalyzer = Analyzer().semanticAnalyzer(code)
-            print(semanticAnalyzer)
+            semantic_analyzer = Analyzer().semanticAnalyzer(code)
+            print(semantic_analyzer)
 
             if language == "julia":
                 julia_analyzer = JuliaAnalyzer()
@@ -73,17 +84,9 @@ class CodeInputApp:
             self.console_output.config(state=tk.DISABLED)
 
             # Después de analizar el código, actualiza el conteo de caracteres
-            self.update_character_count()
+            self.update_button_and_count()
         else:
             messagebox.showwarning("Advertencia", "El código debe tener entre 50 y 500 caracteres.")
-
-    def update_run_button_state(self):
-        code = self.code_input.get("1.0", tk.END)
-        character_count = len(code) - 1
-        if 50 <= character_count <= 500:
-            self.run_button.config(state=tk.NORMAL)
-        else:
-            self.run_button.config(state=tk.DISABLED)
 
     def identify_language(self, code):
         if "println" in code:
@@ -101,8 +104,7 @@ class CodeInputApp:
                 self.code_input.delete("1.0", tk.END)
                 self.code_input.insert(tk.END, code)
                 # Después de abrir el archivo, actualiza el conteo de caracteres y el estado del botón
-                self.update_character_count()
-                self.update_run_button_state()
+                self.update_button_and_count()
 
     def open_file_ruby(self):
         file_path = filedialog.askopenfilename(filetypes=[("Archivos Ruby", "*.rb")])
@@ -112,8 +114,7 @@ class CodeInputApp:
                 self.code_input.delete("1.0", tk.END)
                 self.code_input.insert(tk.END, code)
                 # Después de abrir el archivo, actualiza el conteo de caracteres y el estado del botón
-                self.update_character_count()
-                self.update_run_button_state()
+                self.update_button_and_count()
 
     def save_as(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Archivos de Texto", "*.txt"),
@@ -123,11 +124,6 @@ class CodeInputApp:
             with open(file_path, "w") as file:
                 code = self.code_input.get("1.0", tk.END)
                 file.write(code)
-
-    def update_character_count(self):
-        code = self.code_input.get("1.0", tk.END)
-        character_count = len(code) - 1
-        self.character_count_label.config(text=f"Número de caracteres: {character_count}")
 
 if __name__ == "__main__":
     CodeInputApp.install_dependencies()
