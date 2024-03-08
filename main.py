@@ -1,8 +1,8 @@
 import ply.lex as lex
 import tkinter as tk
 from tkinter import scrolledtext, filedialog, messagebox
-from JuliaAnalyzer import JuliaAnalyzer
-from semanticAnalyzer import Analyzer
+from juliaAnalyzer import JuliaAnalyzer
+from semanthicAnalyzer import Analyzer
 import subprocess
 import sys
 
