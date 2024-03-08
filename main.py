@@ -24,7 +24,7 @@ class CodeInputApp:
 
         self.code_input = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=40, height=20, fg="#CDCCCD")
                 
-        self.code_input.configure(bg="#1F222A")       
+        self.code_input.configure(bg="#111")       
         
         self.code_input.grid(row=0, column=0, padx=10, pady=10)
         self.code_input.bind("<KeyRelease>", self.update_button_and_count)
