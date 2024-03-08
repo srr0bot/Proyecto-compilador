@@ -16,7 +16,7 @@ class Analyzer:
                 messages=[
                     {
                         "role": "user",
-                                "content": f"para cada lenguaje en cuestion, analiza cual es y encuentra errores en este codigo: {code}. Los errores muestralos como los mostraria el compilador. No hagas aclaración de porque es el error",
+                                "content": f"Analiza cual  lenguaje de programacion es (Julia o Ruby)  y encuentra errores: {code}. Los errores muestralos como los mostraria el compilador nativo. No hagas aclaración de porque es el error",
                     }
                 ],
             )
