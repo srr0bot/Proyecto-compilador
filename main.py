@@ -6,7 +6,7 @@ from rubyAnalyzer import RubyAnalyzer
 from semanthicAnalyzer import Analyzer
 
 class CodeInputApp:
-
+        
     def __init__(self, root):
         self.root = root
         self.root.title("Editor de Código")
@@ -22,16 +22,21 @@ class CodeInputApp:
         self.file_menu.add_command(label="Abrir Ruby", command=self.open_file_ruby)
         self.file_menu.add_command(label="Guardar Como", command=self.save_as)
 
-        self.code_input = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=40, height=20)
+        self.code_input = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=40, height=20, fg="#CDCCCD")
+                
+        self.code_input.configure(bg="#1F222A")       
+        
         self.code_input.grid(row=0, column=0, padx=10, pady=10)
         self.code_input.bind("<KeyRelease>", self.update_button_and_count)
 
         self.run_button = tk.Button(root, text="Ejecutar Código", command=self.execute_code, state=tk.DISABLED)
         self.run_button.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky=tk.W + tk.E)
 
-        self.console_output = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=40, height=20)
+        self.console_output = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=40, height=20, fg="#CDCCCD")
         self.console_output.grid(row=0, column=1, padx=10, pady=10)
         self.console_output.config(state=tk.DISABLED)
+        
+        self.console_output.configure(bg="#1A1A1A")
 
         self.character_count_label = tk.Label(root, text="Número de caracteres: 0")
         self.character_count_label.grid(row=2, column=0, columnspan=2, padx=10, pady=10)

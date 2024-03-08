@@ -1,6 +1,6 @@
-julia> a = [1,2,3.6,10.9]
-4-element Array{Float64,1}:
-  1.0
-  2.0
-  3.6
- 10.9
+julia> A = rand(3)
+3-Array{Float64,1}:
+ 0.443922
+ 0.79404 
+ 0.959896
+julia> mean(A)
