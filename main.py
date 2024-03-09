@@ -1,9 +1,10 @@
 import ply.lex as lex
 import tkinter as tk
 from tkinter import scrolledtext, filedialog, messagebox
-from juliaAnalyzer import JuliaAnalyzer
-from rubyAnalyzer import RubyAnalyzer
-from semanthicAnalyzer import Analyzer
+from AnalizadorJulia import AnalizadorJulia
+from metodos import Metodos
+#from rubyAnalyzer import RubyAnalyzer
+#from semanthicAnalyzer import Analyzer
 
 class CodeInputApp:
         
@@ -26,6 +27,8 @@ class CodeInputApp:
                 
         self.code_input.configure(bg="#111")       
         
+        self.code_input.bind('<Return>', self.ejecutar_metodo)
+        
         self.code_input.grid(row=0, column=0, padx=10, pady=10)
         self.code_input.bind("<KeyRelease>", self.update_button_and_count)
 
@@ -41,14 +44,19 @@ class CodeInputApp:
         self.character_count_label = tk.Label(root, text="Número de caracteres: 0")
         self.character_count_label.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
 
-        self.update_button_and_count()
+        #self.update_button_and_count()
 
+    def ejecutar_metodo(self, event):
+        metodoss = Metodos()
+        metodoss.crearArray()
+        print("Método ejecutado al presionar Enter")
+    
     def update_button_and_count(self, event=None):
         code = self.code_input.get("1.0", tk.END)
         character_count = len(code) - 1  # Restar 1 para excluir el último carácter que es una nueva línea
         self.character_count_label.config(text=f"Número de caracteres: {character_count}")
 
-        if 50 <= character_count <= 500:
+        if 1 <= character_count <= 500:
             self.run_button.config(state=tk.NORMAL)
         else:
             self.run_button.config(state=tk.DISABLED)
@@ -56,43 +64,55 @@ class CodeInputApp:
     def execute_code(self):
         code = self.code_input.get("1.0", tk.END)
         character_count = len(code) - 1  # Restar 1 para excluir el último carácter que es una nueva línea
+        self.console_output.config(state=tk.NORMAL)
+        self.console_output.delete("1.0", tk.END)
+            
+        julia_analyzer = AnalizadorJulia()
+        analyzed_tokens = julia_analyzer.analyze_code(code)
+        result = f"Tokens reconocidos:\n{analyzed_tokens}"
+        numbers = []
 
-        # Verificar la longitud del código
-        if 50 <= character_count <= 500:
-            self.console_output.config(state=tk.NORMAL)
-            self.console_output.delete("1.0", tk.END)
+        self.console_output.insert(tk.END, result)
+        #self.console_output.config(state=tk.DISABLED)
 
-            language = self.identify_language(code)
-            semantic_analyzer = Analyzer().semanticAnalyzer(code)
-            ejecucion = semantic_analyzer.split("Ejecución: ", 1)
-            print(semantic_analyzer)
-            if len(ejecucion) > 1:
-                error = ejecucion[0]  
-                compilacion = ejecucion[1]
-                if len(error) == 0:
-                    messagebox.showinfo("Información", compilacion)
-                else:
-                    print("Detección de errores:\n", error)
-                
+        for cont in analyzed_tokens:
+            try:
+                number = int(cont[1])  
+                numbers.append(number)  
+            except ValueError:
+                pass  
+        
+        number = numbers[0]
+        metodos = Metodos()
 
-            if language == "julia":
-                julia_analyzer = JuliaAnalyzer()
-                analyzed_tokens = julia_analyzer.analyze_code(code)
-                result = f"Tokens reconocidos:\n{analyzed_tokens}"
-            elif language == "ruby":
-                ruby_analyzer = RubyAnalyzer()
-                analyzed_tokens = ruby_analyzer.analyze_code(code)
-                result = f"Tokens reconocidos:\n{analyzed_tokens}"
-            else:
-                result = "Lenguaje no identificado."
-
-            self.console_output.insert(tk.END, result)
-            self.console_output.config(state=tk.DISABLED)
+        array = metodos.crearArray(number)
+        arreglo = f'\nArray: \n{array}'
+        self.console_output.insert(tk.END, arreglo)
+        
+        media = metodos.media(array)
+        mean = f'\nMedia: \n{media}'
+        self.console_output.insert(tk.END, mean)
+        
+        moda = metodos.calcular_moda(array)
+        mode = f'\nModa: \n{moda}'
+        self.console_output.insert(tk.END, mode)
+        
+        varianza = metodos.calcular_varianza(array)
+        variance = f'\nVarianza: \n{varianza}'
+        self.console_output.insert(tk.END, variance)
+        
+        desviacion = metodos.calcular_desviacion_estandar(array)
+        desv = f'\nDesviacion Estandar: \n{desviacion}'
+        self.console_output.insert(tk.END, desv)
+        
+        mediana = metodos.calcular_mediana(array)
+        med = f'\nMediana: \n{mediana}'
+        self.console_output.insert(tk.END, med)
+        
+        self.console_output.config(state=tk.DISABLED)
 
             # Después de analizar el código, actualiza el conteo de caracteres
-            self.update_button_and_count()
-        else:
-            messagebox.showwarning("Advertencia", "El código debe tener entre 50 y 500 caracteres.")
+        self.update_button_and_count()
 
     def identify_language(self, code):
         if "println" in code:
