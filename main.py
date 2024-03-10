@@ -1,5 +1,6 @@
 import ply.lex as lex
 import tkinter as tk
+import re
 from tkinter import scrolledtext, filedialog, messagebox
 from AnalizadorJulia import AnalizadorJulia
 from metodos import Metodos
@@ -55,15 +56,13 @@ class CodeInputApp:
             self.run_button.config(state=tk.DISABLED)
 
     def execute_code(self):
-        code = self.code_input.get("1.0", tk.END)
-        print(code)
-            
+        code = self.code_input.get("1.0", tk.END)            
         
         character_count = len(code) - 1  # Restar 1 para excluir el último carácter que es una nueva línea
         self.console_output.config(state=tk.NORMAL)
         self.console_output.delete("1.0", tk.END)
         
-        if self.identify_language == "julia":
+        if self.identify_language(code) == "julia":
             julia_analyzer = AnalizadorJulia()
             analyzed_tokens = julia_analyzer.analyze_code(code)
             result = f"Tokens reconocidos:\n{analyzed_tokens}"
@@ -88,7 +87,6 @@ class CodeInputApp:
             elif "mean" in code:
                 media = metodos.media(array)
                 mean = f'\nMedia: \n{media}'
-                print(mean)
                 self.console_output.insert(tk.END, mean)
             elif "mode" in code:
                 moda = metodos.calcular_moda(array)
@@ -108,27 +106,30 @@ class CodeInputApp:
                 self.console_output.insert(tk.END, med)
             else:
                 self.console_output.insert(tk.END, "Método no reconocido")
+        elif self.identify_language(code) == "julia":
+            print("Ruby")
         else:
-            print("ruby")
+            print(self.identify_language(code))
+
         
         self.console_output.config(state=tk.DISABLED)
 
             # Después de analizar el código, actualiza el conteo de caracteres
         self.update_button_and_count()
 
-    def identify_language(code):
-        julia_keywords = ["rand", "mean", "mode", "var", "std", "median"]
-        ruby_keywords = ["def", "end", "if", "else", "elsif", "puts", "print", "while", "for"]
+    def identify_language(self, code):
+        
+        expresionJulia = r'[a-zA-Z]+\s*=\s*[a-z]+\(\d+\)$|[a-z]+\([a-zA-Z]+\)$'
+        
+        expresionRuby = r'[a-zA-Z]+\s*=\s*[a-zA-Z]+\.[a-z]+$|[a-zA-Z]+\s*=\s*Array\.new\(\d+\)\s*\{\s*rand\s*\}$'
 
-        julia_matches = sum(keyword in code for keyword in julia_keywords)
-        ruby_matches = sum(keyword in code for keyword in ruby_keywords)
-
-        if julia_matches > ruby_matches:
+        if re.match(expresionJulia, code):
             return "julia"
-        elif ruby_matches > julia_matches:
+        elif re.match(expresionRuby, code):
             return "ruby"
         else:
             return "unknown"
+        
 
     def open_file_julia(self):
         file_path = filedialog.askopenfilename(filetypes=[("Archivos Julia", "*.jl")])

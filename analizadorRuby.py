@@ -1,6 +1,6 @@
 from ply import lex
 
-class AnalizadorJulia:
+class analizadorRuby:
 
     def __init__(self):
         self.lexer = lex.lex(module=self)
