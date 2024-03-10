@@ -72,8 +72,10 @@ class CodeInputApp:
     def guardar_array(self, nombre_variable, array):
         arrays = self.cargar_array()
         if nombre_variable in arrays:
-            print(f"Ya existe un array con el nombre de variable '{nombre_variable}'.")
+            self.console_output.insert(tk.END, f"\nYa existe un array con el nombre de variable '{nombre_variable}'.")
         else:
+            arreglo = f'\n{array}\n'
+            self.console_output.insert(tk.END, arreglo)
             arrays[nombre_variable] = array
             with open('arrays.json', 'w') as json_file:
                 json.dump(arrays, json_file)
@@ -85,18 +87,28 @@ class CodeInputApp:
         if nombre_variable in arrays:
             return arrays[nombre_variable]
         else:
-            print(f"No se encontró el array para la variable {nombre_variable}")
+            self.console_output.insert(tk.END, f"\nNo se encontró el array para la variable '{nombre_variable}'.")
             return None
     
-    def match(self, ultima_linea):
-        nombre_variable_match = re.match(r'^mean\((\w+)\)$', ultima_linea)
-        if nombre_variable_match:
-            nombre_variable = nombre_variable_match.group(1)
+    def matchjulia(self, ultima_linea):
+        nombre_variable_matchjulia = re.match(r'^\b[a-z]+\((\w+)\)$', ultima_linea)
+        if nombre_variable_matchjulia:
+            nombre_variable = nombre_variable_matchjulia.group(1)
             array_extraido = self.extraer_array_por_nombre(nombre_variable)
             return array_extraido
         else:
             self.console_output.insert(tk.END, "No se encontró el nombre de la variable para calcular la media")
 
+    def matchRuby(self, ultima_linea):
+        nombre_variable_match = re.match(r'^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([a-zA-Z_][a-zA-Z0-9_]*)\.([a-z]+)', ultima_linea)
+        
+        if nombre_variable_match:
+            nombre_variable = nombre_variable_match.group(2)
+            array_extraido = self.extraer_array_por_nombre(nombre_variable)
+            return array_extraido
+        else:
+            self.console_output.insert(tk.END, "No se encontró el nombre de la variable para calcular la media")
+    
     def execute_code(self):
         code = self.code_input.get("1.0", tk.END)
         
@@ -105,8 +117,7 @@ class CodeInputApp:
         for linea in reversed(lineas):
             if linea.strip():
                 ultima_linea = linea
-                break
-        print(ultima_linea)            
+                break          
         
         character_count = len(code) - 1 
         self.console_output.config(state=tk.NORMAL)
@@ -138,15 +149,11 @@ class CodeInputApp:
                 if nombre_variable:
                     nombre_variable = nombre_variable.group(1)
                     print("Nombre de la variable:", nombre_variable)
-                    self.guardar_array(nombre_variable, array)
-                    for nombre_variable, array in arrays.items():
-                        print(f"Nombre de la variable: {nombre_variable}, Array: {array}")
-                    arreglo = f'\n{array}\n'
-                    self.console_output.insert(tk.END, arreglo)                   
+                    self.guardar_array(nombre_variable, array)                   
                 else:
                     print("No se encontró el nombre de la variable")
             elif "mean" in ultima_linea:
-                array_extraido = self.match(ultima_linea)
+                array_extraido = self.matchjulia(ultima_linea)
                 if array_extraido is not None:
                     media = metodos.media(array_extraido)
                     mean = f'\nMedia: \n{media}'
@@ -154,21 +161,38 @@ class CodeInputApp:
                 else:
                     print("No se pudo extraer el array.")
             elif "mode" in ultima_linea:
-                moda = metodos.calcular_moda(array)
-                mode = f'\nModa: \n{moda}'
-                self.console_output.insert(tk.END, mode)
+                array_extraido = self.matchjulia(ultima_linea)
+                if array_extraido is not None:
+                    moda = metodos.calcular_moda(array_extraido)
+                    mode = f'\nModa: \n{moda}'
+                    self.console_output.insert(tk.END, mode)
+                else:
+                    print("No se pudo extraer el array.")
+                array
             elif "var" in ultima_linea:
-                varianza = metodos.calcular_varianza(array)
-                variance = f'\nVarianza: \n{varianza}'
-                self.console_output.insert(tk.END, variance)
+                array_extraido = self.matchjulia(ultima_linea)
+                if array_extraido is not None:
+                    varianza = metodos.calcular_varianza(array_extraido)
+                    variance = f'\nVarianza: \n{varianza}'
+                    self.console_output.insert(tk.END, variance)
+                else:
+                    print("No se pudo extraer el array.")
             elif "std" in ultima_linea:
-                desviacion = metodos.calcular_desviacion_estandar(array)
-                desv = f'\nDesviacion Estandar: \n{desviacion}'
-                self.console_output.insert(tk.END, desv)
+                array_extraido = self.matchjulia(ultima_linea)
+                if array_extraido is not None:
+                    desviacion = metodos.calcular_desviacion_estandar(array_extraido)
+                    desv = f'\nDesviacion Estandar: \n{desviacion}'
+                    self.console_output.insert(tk.END, desv)
+                else:
+                    print("No se pudo extraer el array.")
             elif "median" in ultima_linea:
-                mediana = metodos.calcular_mediana(array)
-                med = f'\nMediana: \n{mediana}'
-                self.console_output.insert(tk.END, med)
+                array_extraido = self.matchjulia(ultima_linea)
+                if array_extraido is not None:
+                    mediana = metodos.calcular_mediana(array_extraido)
+                    med = f'\nMediana: \n{mediana}'
+                    self.console_output.insert(tk.END, med)
+                else:
+                    print("No se pudo extraer el array.")
             else:
                 self.console_output.insert(tk.END, "Método no reconocido")
                 
@@ -187,37 +211,65 @@ class CodeInputApp:
                 except ValueError:
                     pass  
             
-            number = numbers[0]
             metodos = Metodos()
 
             if "rand" in ultima_linea:
+                number = numbers[0]
                 array = metodos.crearArray(number)
-                arreglo = f'\n{array}\n'
-                self.console_output.insert(tk.END, arreglo)
+                nombre_variable_matchjulia = re.match(r'^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=', ultima_linea)
+                if nombre_variable_matchjulia:
+                    nombre_variable = nombre_variable_matchjulia.group(1)
+                    print("Nombre de la variable:", nombre_variable)
+                    self.guardar_array(nombre_variable, array)
+                    arreglo = f'\n{array}\n'
+                    self.console_output.insert(tk.END, arreglo)                   
+                else:
+                    print("No se encontró el nombre de la variable")
             elif "mean" in ultima_linea:
-                media = metodos.media(array)
-                mean = f'\nMedia: \n{media}'
-                self.console_output.insert(tk.END, mean)
+                array_extraido = self.matchRuby(ultima_linea)
+                if array_extraido is not None:
+                    media = metodos.media(array_extraido)
+                    mean = f'\nMedia: \n{media}'
+                    self.console_output.insert(tk.END, mean)
+                else:
+                    print("No se pudo extraer el array.")
             elif "mode" in ultima_linea:
-                moda = metodos.calcular_moda(array)
-                mode = f'\nModa: \n{moda}'
-                self.console_output.insert(tk.END, mode)
+                array_extraido = self.matchRuby(ultima_linea)
+                if array_extraido is not None:
+                    moda = metodos.calcular_moda(array_extraido)
+                    mode = f'\nModa: \n{moda}'
+                    self.console_output.insert(tk.END, mode)
+                else:
+                    print("No se pudo extraer el array.")
+                
             elif "var" in ultima_linea:
-                varianza = metodos.calcular_varianza(array)
-                variance = f'\nVarianza: \n{varianza}'
-                self.console_output.insert(tk.END, variance)
+                array_extraido = self.matchRuby(ultima_linea)
+                if array_extraido is not None:
+                    varianza = metodos.calcular_varianza(array_extraido)
+                    variance = f'\nVarianza: \n{varianza}'
+                    self.console_output.insert(tk.END, variance)
+                else:
+                    print("No se pudo extraer el array.")
             elif "std" in ultima_linea:
-                desviacion = metodos.calcular_desviacion_estandar(array)
-                desv = f'\nDesviacion Estandar: \n{desviacion}'
-                self.console_output.insert(tk.END, desv)
+                array_extraido = self.matchRuby(ultima_linea)
+                if array_extraido is not None:
+                    desviacion = metodos.calcular_desviacion_estandar(array_extraido)
+                    desv = f'\nDesviacion Estandar: \n{desviacion}'
+                    self.console_output.insert(tk.END, desv)
+                else:
+                    print("No se pudo extraer el array.")
             elif "median" in ultima_linea:
-                mediana = metodos.calcular_mediana(array)
-                med = f'\nMediana: \n{mediana}'
-                self.console_output.insert(tk.END, med)
+                array_extraido = self.matchRuby(ultima_linea)
+                if array_extraido is not None:
+                    mediana = metodos.calcular_mediana(array_extraido)
+                    med = f'\nMediana: \n{mediana}'
+                    self.console_output.insert(tk.END, med)
+                else:
+                    print("No se pudo extraer el array.")
             else:
                 self.console_output.insert(tk.END, "Método no reconocido")
         else:
-            print(self.identify_language(ultima_linea))
+            self.console_output.insert(tk.END, self.identify_language(ultima_linea))
 
         
         self.console_output.config(state=tk.DISABLED)
