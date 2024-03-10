@@ -3,6 +3,7 @@ import tkinter as tk
 import re
 from tkinter import scrolledtext, filedialog, messagebox
 from AnalizadorJulia import AnalizadorJulia
+from analizadorRuby import analizadorRuby
 from metodos import Metodos
 #from rubyAnalyzer import RubyAnalyzer
 #from semanthicAnalyzer import Analyzer
@@ -106,8 +107,50 @@ class CodeInputApp:
                 self.console_output.insert(tk.END, med)
             else:
                 self.console_output.insert(tk.END, "Método no reconocido")
-        elif self.identify_language(code) == "julia":
-            print("Ruby")
+        elif self.identify_language(code) == "ruby":
+            ruby_analyzer = analizadorRuby()
+            analyzed_tokens = ruby_analyzer.analyze_code(code)
+            result = f"Tokens reconocidos:\n{analyzed_tokens}"
+            numbers = []
+            self.console_output.insert(tk.END, result)
+            #self.console_output.config(state=tk.DISABLED)
+
+            for cont in analyzed_tokens:
+                try:
+                    number = int(cont[1])  
+                    numbers.append(number)  
+                except ValueError:
+                    pass  
+            
+            number = numbers[0]
+            metodos = Metodos()
+
+            if "rand" in code:
+                array = metodos.crearArray(number)
+                arreglo = f'\n{array}\n'
+                self.console_output.insert(tk.END, arreglo)
+            elif "mean" in code:
+                media = metodos.media(array)
+                mean = f'\nMedia: \n{media}'
+                self.console_output.insert(tk.END, mean)
+            elif "mode" in code:
+                moda = metodos.calcular_moda(array)
+                mode = f'\nModa: \n{moda}'
+                self.console_output.insert(tk.END, mode)
+            elif "var" in code:
+                varianza = metodos.calcular_varianza(array)
+                variance = f'\nVarianza: \n{varianza}'
+                self.console_output.insert(tk.END, variance)
+            elif "std" in code:
+                desviacion = metodos.calcular_desviacion_estandar(array)
+                desv = f'\nDesviacion Estandar: \n{desviacion}'
+                self.console_output.insert(tk.END, desv)
+            elif "median" in code:
+                mediana = metodos.calcular_mediana(array)
+                med = f'\nMediana: \n{mediana}'
+                self.console_output.insert(tk.END, med)
+            else:
+                self.console_output.insert(tk.END, "Método no reconocido")
         else:
             print(self.identify_language(code))
 
