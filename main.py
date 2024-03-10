@@ -220,9 +220,7 @@ class CodeInputApp:
                 if nombre_variable_matchjulia:
                     nombre_variable = nombre_variable_matchjulia.group(1)
                     print("Nombre de la variable:", nombre_variable)
-                    self.guardar_array(nombre_variable, array)
-                    arreglo = f'\n{array}\n'
-                    self.console_output.insert(tk.END, arreglo)                   
+                    self.guardar_array(nombre_variable, array)                 
                 else:
                     print("No se encontró el nombre de la variable")
             elif "mean" in ultima_linea:
