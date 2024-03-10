@@ -26,9 +26,7 @@ class CodeInputApp:
         self.code_input = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=40, height=20, fg="#CDCCCD")
                 
         self.code_input.configure(bg="#111")       
-        
-        self.code_input.bind('<Return>', self.ejecutar_metodo)
-        
+                
         self.code_input.grid(row=0, column=0, padx=10, pady=10)
         self.code_input.bind("<KeyRelease>", self.update_button_and_count)
 
@@ -45,11 +43,6 @@ class CodeInputApp:
         self.character_count_label.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
 
         #self.update_button_and_count()
-
-    def ejecutar_metodo(self, event):
-        metodoss = Metodos()
-        metodoss.crearArray()
-        print("Método ejecutado al presionar Enter")
     
     def update_button_and_count(self, event=None):
         code = self.code_input.get("1.0", tk.END)
@@ -63,61 +56,76 @@ class CodeInputApp:
 
     def execute_code(self):
         code = self.code_input.get("1.0", tk.END)
+        print(code)
+            
+        
         character_count = len(code) - 1  # Restar 1 para excluir el último carácter que es una nueva línea
         self.console_output.config(state=tk.NORMAL)
         self.console_output.delete("1.0", tk.END)
+        
+        if self.identify_language == "julia":
+            julia_analyzer = AnalizadorJulia()
+            analyzed_tokens = julia_analyzer.analyze_code(code)
+            result = f"Tokens reconocidos:\n{analyzed_tokens}"
+            numbers = []
+            self.console_output.insert(tk.END, result)
+            #self.console_output.config(state=tk.DISABLED)
+
+            for cont in analyzed_tokens:
+                try:
+                    number = int(cont[1])  
+                    numbers.append(number)  
+                except ValueError:
+                    pass  
             
-        julia_analyzer = AnalizadorJulia()
-        analyzed_tokens = julia_analyzer.analyze_code(code)
-        result = f"Tokens reconocidos:\n{analyzed_tokens}"
-        numbers = []
+            number = numbers[0]
+            metodos = Metodos()
 
-        self.console_output.insert(tk.END, result)
-        #self.console_output.config(state=tk.DISABLED)
-
-        for cont in analyzed_tokens:
-            try:
-                number = int(cont[1])  
-                numbers.append(number)  
-            except ValueError:
-                pass  
-        
-        number = numbers[0]
-        metodos = Metodos()
-
-        array = metodos.crearArray(number)
-        arreglo = f'\nArray: \n{array}'
-        self.console_output.insert(tk.END, arreglo)
-        
-        media = metodos.media(array)
-        mean = f'\nMedia: \n{media}'
-        self.console_output.insert(tk.END, mean)
-        
-        moda = metodos.calcular_moda(array)
-        mode = f'\nModa: \n{moda}'
-        self.console_output.insert(tk.END, mode)
-        
-        varianza = metodos.calcular_varianza(array)
-        variance = f'\nVarianza: \n{varianza}'
-        self.console_output.insert(tk.END, variance)
-        
-        desviacion = metodos.calcular_desviacion_estandar(array)
-        desv = f'\nDesviacion Estandar: \n{desviacion}'
-        self.console_output.insert(tk.END, desv)
-        
-        mediana = metodos.calcular_mediana(array)
-        med = f'\nMediana: \n{mediana}'
-        self.console_output.insert(tk.END, med)
+            if "rand" in code:
+                array = metodos.crearArray(number)
+                arreglo = f'\n{array}\n'
+                self.console_output.insert(tk.END, arreglo)
+            elif "mean" in code:
+                media = metodos.media(array)
+                mean = f'\nMedia: \n{media}'
+                print(mean)
+                self.console_output.insert(tk.END, mean)
+            elif "mode" in code:
+                moda = metodos.calcular_moda(array)
+                mode = f'\nModa: \n{moda}'
+                self.console_output.insert(tk.END, mode)
+            elif "var" in code:
+                varianza = metodos.calcular_varianza(array)
+                variance = f'\nVarianza: \n{varianza}'
+                self.console_output.insert(tk.END, variance)
+            elif "std" in code:
+                desviacion = metodos.calcular_desviacion_estandar(array)
+                desv = f'\nDesviacion Estandar: \n{desviacion}'
+                self.console_output.insert(tk.END, desv)
+            elif "median" in code:
+                mediana = metodos.calcular_mediana(array)
+                med = f'\nMediana: \n{mediana}'
+                self.console_output.insert(tk.END, med)
+            else:
+                self.console_output.insert(tk.END, "Método no reconocido")
+        else:
+            print("ruby")
         
         self.console_output.config(state=tk.DISABLED)
 
             # Después de analizar el código, actualiza el conteo de caracteres
         self.update_button_and_count()
 
-    def identify_language(self, code):
-        if "println" in code:
+    def identify_language(code):
+        julia_keywords = ["rand", "mean", "mode", "var", "std", "median"]
+        ruby_keywords = ["def", "end", "if", "else", "elsif", "puts", "print", "while", "for"]
+
+        julia_matches = sum(keyword in code for keyword in julia_keywords)
+        ruby_matches = sum(keyword in code for keyword in ruby_keywords)
+
+        if julia_matches > ruby_matches:
             return "julia"
-        elif "puts" in code:
+        elif ruby_matches > julia_matches:
             return "ruby"
         else:
             return "unknown"
