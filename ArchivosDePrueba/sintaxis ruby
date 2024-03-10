@@ -1,0 +1,2 @@
+A = Array.new(3) {rand}
+datos = A.(mean, mode, var...)

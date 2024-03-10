@@ -15,7 +15,7 @@ class CodeInputApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Editor de Código")
-        self.root.geometry("730x430")
+        self.root.geometry("730x470")
 
         self.menu_bar = tk.Menu(root)
         self.root.config(menu=self.menu_bar)
@@ -123,7 +123,8 @@ class CodeInputApp:
         self.console_output.config(state=tk.NORMAL)
         self.console_output.delete("1.0", tk.END)
         
-        if self.identify_language(ultima_linea) == "julia":
+        if self.identify_language(ultima_linea) == "Julia":
+            self.console_output.insert(tk.END, f"Lenguaje: '{self.identify_language(ultima_linea)}'")
             julia_analyzer = AnalizadorJulia()
             analyzed_tokens = julia_analyzer.analyze_code(code)
             result = f"Tokens reconocidos:\n{analyzed_tokens}"
@@ -196,10 +197,11 @@ class CodeInputApp:
             else:
                 self.console_output.insert(tk.END, "Método no reconocido")
                 
-        elif self.identify_language(ultima_linea) == "ruby":
+        elif self.identify_language(ultima_linea) == "Ruby":
+            self.console_output.insert(tk.END, f"Lenguaje: '{self.identify_language(ultima_linea)}'")
             ruby_analyzer = analizadorRuby()
             analyzed_tokens = ruby_analyzer.analyze_code(ultima_linea)
-            result = f"Tokens reconocidos:\n{analyzed_tokens}"
+            result = f"\nTokens reconocidos:\n{analyzed_tokens}"
             numbers = []
             self.console_output.insert(tk.END, result)
             #self.console_output.config(state=tk.DISABLED)
@@ -274,14 +276,13 @@ class CodeInputApp:
         self.update_button_and_count()
 
     def identify_language(self, code):
-        
         expresionJulia = r'[a-zA-Z]+\s*=\s*[a-z]+\(\d+\)$|\b([a-z]+)\(([a-zA-Z]+)\)$'
         expresionRuby = r'[a-zA-Z]+\s*=\s*[a-zA-Z]+\.[a-z]+$|[a-zA-Z]+\s*=\s*Array\.new\(\d+\)\s*\{\s*rand\s*\}$'
 
         if re.match(expresionJulia, code):
-            return "julia"
+            return "Julia"
         elif re.match(expresionRuby, code):
-            return "ruby"
+            return "Ruby"
         else:
             return "Lenguaje no encontrado"
 
