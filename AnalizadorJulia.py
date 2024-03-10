@@ -9,10 +9,10 @@ class AnalizadorJulia:
     
     t_ASIGN = r'='
     t_ARGUMENT = r'\d+'
-    t_VARIABLE = r'\b(?![a-z]+\()[a-zA-Z_][a-zA-Z_0-9]*'
+    t_VARIABLE = r'\b(?![a-z]+\()[a-zA-Z_][a-zA-Z_0-9]*$'
     t_METHOD = r'rand\(|mean\(|mode\(|var\(|std\(|median\('
     t_ignore = ' \t'
-    t_RPAREN = r'\)'
+    t_RPAREN = r'\)$'
     t_NEWLINE =r'\n'
     
     def t_error(self, t):
