@@ -48,7 +48,7 @@ class CodeInputApp:
     
     def update_button_and_count(self, event=None):
         code = self.code_input.get("1.0", tk.END)
-        character_count = len(code) - 1  # Restar 1 para excluir el último carácter que es una nueva línea
+        character_count = len(code) - 1  
         self.character_count_label.config(text=f"Número de caracteres: {character_count}")
 
         if 1 <= character_count <= 500:
@@ -59,7 +59,7 @@ class CodeInputApp:
     def execute_code(self):
         code = self.code_input.get("1.0", tk.END)            
         
-        character_count = len(code) - 1  # Restar 1 para excluir el último carácter que es una nueva línea
+        character_count = len(code) - 1 
         self.console_output.config(state=tk.NORMAL)
         self.console_output.delete("1.0", tk.END)
         
@@ -156,14 +156,11 @@ class CodeInputApp:
 
         
         self.console_output.config(state=tk.DISABLED)
-
-            # Después de analizar el código, actualiza el conteo de caracteres
         self.update_button_and_count()
 
     def identify_language(self, code):
         
         expresionJulia = r'[a-zA-Z]+\s*=\s*[a-z]+\(\d+\)$|[a-z]+\([a-zA-Z]+\)$'
-        
         expresionRuby = r'[a-zA-Z]+\s*=\s*[a-zA-Z]+\.[a-z]+$|[a-zA-Z]+\s*=\s*Array\.new\(\d+\)\s*\{\s*rand\s*\}$'
 
         if re.match(expresionJulia, code):
@@ -171,7 +168,7 @@ class CodeInputApp:
         elif re.match(expresionRuby, code):
             return "ruby"
         else:
-            return "unknown"
+            return "Lenguaje no encontrado"
         
 
     def open_file_julia(self):
@@ -181,7 +178,6 @@ class CodeInputApp:
                 code = file.read()
                 self.code_input.delete("1.0", tk.END)
                 self.code_input.insert(tk.END, code)
-                # Después de abrir el archivo, actualiza el conteo de caracteres y el estado del botón
                 self.update_button_and_count()
 
     def open_file_ruby(self):
