@@ -6,9 +6,10 @@ load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
 class Analyzer:
-    def semanticAnalyzer (self, code):
+    def semanticAnalyzer (self, code, language):
         self.code = code
         try:
+            print(code, language)
             # Crear la instancia del cliente OpenAI con la clave de la API
             client = OpenAI(api_key=api_key)
             completion = client.chat.completions.create(
@@ -16,7 +17,7 @@ class Analyzer:
                 messages=[
                     {
                         "role": "user",
-                                "content": f"Analiza cual  lenguaje de programacion es (Julia o Ruby)  y encuentre errores que signifiquen una incorrecta compilación del codigo, si no, no los muestres y compila: {code}. En la respuesta no muestres el nombre del lenguaje. Los errores muestralos como los mostraria un compilador. si es correcto el codigo muestra la ejecucion de la siguiente forma: Ejecución:(Aqui va el resultado del codigo), si no, muestra: (aqui el error de compilacion)",
+                                "content": f"En este codigo de {language} encuentra errores de sintaxix que signifiquen una incorrecta compilación del codigo, si no, no respondas absolutamente nada y pon ' ': {code}. si hay errores muestralos como se mostraria en una compilación"
                     }
                 ]
             )

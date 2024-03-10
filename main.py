@@ -6,6 +6,7 @@ from tkinter import scrolledtext, filedialog, messagebox
 from AnalizadorJulia import AnalizadorJulia
 from analizadorRuby import analizadorRuby
 from metodos import Metodos
+from semanthicAnalyzer import Analyzer
 
 #from rubyAnalyzer import RubyAnalyzer
 #from semanthicAnalyzer import Analyzer
@@ -123,7 +124,11 @@ class CodeInputApp:
         self.console_output.config(state=tk.NORMAL)
         self.console_output.delete("1.0", tk.END)
         
+        semantic_analyzer = Analyzer().semanticAnalyzer(code, "Julia")
+        print(semantic_analyzer)
+        
         if self.identify_language(ultima_linea) == "Julia":
+            
             self.console_output.insert(tk.END, f"Lenguaje: '{self.identify_language(ultima_linea)}'")
             julia_analyzer = AnalizadorJulia()
             analyzed_tokens = julia_analyzer.analyze_code(code)
