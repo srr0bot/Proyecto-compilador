@@ -1,10 +1,12 @@
 import ply.lex as lex
 import tkinter as tk
 import re
+import json
 from tkinter import scrolledtext, filedialog, messagebox
 from AnalizadorJulia import AnalizadorJulia
 from analizadorRuby import analizadorRuby
 from metodos import Metodos
+
 #from rubyAnalyzer import RubyAnalyzer
 #from semanthicAnalyzer import Analyzer
 
@@ -55,15 +57,62 @@ class CodeInputApp:
             self.run_button.config(state=tk.NORMAL)
         else:
             self.run_button.config(state=tk.DISABLED)
+            
+    # Función para cargar el diccionario desde el archivo JSON
+    def cargar_array(self):
+        try:
+            with open('arrays.json', 'r') as json_file:
+              arrays = json.load(json_file)
+            return arrays
+        except FileNotFoundError:
+            print("El archivo JSON no existe.")
+            return {}
+    
+    # Función para guardar un array en el diccionario y en el archivo JSON
+    def guardar_array(self, nombre_variable, array):
+        arrays = self.cargar_array()
+        if nombre_variable in arrays:
+            print(f"Ya existe un array con el nombre de variable '{nombre_variable}'.")
+        else:
+            arrays[nombre_variable] = array
+            with open('arrays.json', 'w') as json_file:
+                json.dump(arrays, json_file)
+            print(f"El array para la variable '{nombre_variable}' se ha guardado correctamente.")
+            
+    # Función para extraer un array por nombre de variable
+    def extraer_array_por_nombre(self, nombre_variable):
+        arrays = self.cargar_array()
+        if nombre_variable in arrays:
+            return arrays[nombre_variable]
+        else:
+            print(f"No se encontró el array para la variable {nombre_variable}")
+            return None
+    
+    def match(self, ultima_linea):
+        nombre_variable_match = re.match(r'^mean\((\w+)\)$', ultima_linea)
+        if nombre_variable_match:
+            nombre_variable = nombre_variable_match.group(1)
+            array_extraido = self.extraer_array_por_nombre(nombre_variable)
+            return array_extraido
+        else:
+            self.console_output.insert(tk.END, "No se encontró el nombre de la variable para calcular la media")
 
     def execute_code(self):
-        code = self.code_input.get("1.0", tk.END)            
+        code = self.code_input.get("1.0", tk.END)
+        
+        lineas = code.splitlines()
+        
+        for linea in reversed(lineas):
+            if linea.strip():
+                ultima_linea = linea
+                break
+        print(ultima_linea)            
         
         character_count = len(code) - 1 
         self.console_output.config(state=tk.NORMAL)
         self.console_output.delete("1.0", tk.END)
         
-        if self.identify_language(code) == "julia":
+        if self.identify_language(ultima_linea) == "julia":
             julia_analyzer = AnalizadorJulia()
             analyzed_tokens = julia_analyzer.analyze_code(code)
             result = f"Tokens reconocidos:\n{analyzed_tokens}"
@@ -78,38 +127,54 @@ class CodeInputApp:
                 except ValueError:
                     pass  
             
-            number = numbers[0]
+            
             metodos = Metodos()
-
-            if "rand" in code:
+            arrays = {}
+            
+            if "rand" in ultima_linea:
+                number = numbers[0]
                 array = metodos.crearArray(number)
-                arreglo = f'\n{array}\n'
-                self.console_output.insert(tk.END, arreglo)
-            elif "mean" in code:
-                media = metodos.media(array)
-                mean = f'\nMedia: \n{media}'
-                self.console_output.insert(tk.END, mean)
-            elif "mode" in code:
+                nombre_variable = re.match(r'^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=', ultima_linea)
+                if nombre_variable:
+                    nombre_variable = nombre_variable.group(1)
+                    print("Nombre de la variable:", nombre_variable)
+                    self.guardar_array(nombre_variable, array)
+                    for nombre_variable, array in arrays.items():
+                        print(f"Nombre de la variable: {nombre_variable}, Array: {array}")
+                    arreglo = f'\n{array}\n'
+                    self.console_output.insert(tk.END, arreglo)                   
+                else:
+                    print("No se encontró el nombre de la variable")
+            elif "mean" in ultima_linea:
+                array_extraido = self.match(ultima_linea)
+                if array_extraido is not None:
+                    media = metodos.media(array_extraido)
+                    mean = f'\nMedia: \n{media}'
+                    self.console_output.insert(tk.END, mean)
+                else:
+                    print("No se pudo extraer el array.")
+            elif "mode" in ultima_linea:
                 moda = metodos.calcular_moda(array)
                 mode = f'\nModa: \n{moda}'
                 self.console_output.insert(tk.END, mode)
-            elif "var" in code:
+            elif "var" in ultima_linea:
                 varianza = metodos.calcular_varianza(array)
                 variance = f'\nVarianza: \n{varianza}'
                 self.console_output.insert(tk.END, variance)
-            elif "std" in code:
+            elif "std" in ultima_linea:
                 desviacion = metodos.calcular_desviacion_estandar(array)
                 desv = f'\nDesviacion Estandar: \n{desviacion}'
                 self.console_output.insert(tk.END, desv)
-            elif "median" in code:
+            elif "median" in ultima_linea:
                 mediana = metodos.calcular_mediana(array)
                 med = f'\nMediana: \n{mediana}'
                 self.console_output.insert(tk.END, med)
             else:
                 self.console_output.insert(tk.END, "Método no reconocido")
-        elif self.identify_language(code) == "ruby":
+                
+        elif self.identify_language(ultima_linea) == "ruby":
             ruby_analyzer = analizadorRuby()
-            analyzed_tokens = ruby_analyzer.analyze_code(code)
+            analyzed_tokens = ruby_analyzer.analyze_code(ultima_linea)
             result = f"Tokens reconocidos:\n{analyzed_tokens}"
             numbers = []
             self.console_output.insert(tk.END, result)
@@ -125,34 +190,34 @@ class CodeInputApp:
             number = numbers[0]
             metodos = Metodos()
 
-            if "rand" in code:
+            if "rand" in ultima_linea:
                 array = metodos.crearArray(number)
                 arreglo = f'\n{array}\n'
                 self.console_output.insert(tk.END, arreglo)
-            elif "mean" in code:
+            elif "mean" in ultima_linea:
                 media = metodos.media(array)
                 mean = f'\nMedia: \n{media}'
                 self.console_output.insert(tk.END, mean)
-            elif "mode" in code:
+            elif "mode" in ultima_linea:
                 moda = metodos.calcular_moda(array)
                 mode = f'\nModa: \n{moda}'
                 self.console_output.insert(tk.END, mode)
-            elif "var" in code:
+            elif "var" in ultima_linea:
                 varianza = metodos.calcular_varianza(array)
                 variance = f'\nVarianza: \n{varianza}'
                 self.console_output.insert(tk.END, variance)
-            elif "std" in code:
+            elif "std" in ultima_linea:
                 desviacion = metodos.calcular_desviacion_estandar(array)
                 desv = f'\nDesviacion Estandar: \n{desviacion}'
                 self.console_output.insert(tk.END, desv)
-            elif "median" in code:
+            elif "median" in ultima_linea:
                 mediana = metodos.calcular_mediana(array)
                 med = f'\nMediana: \n{mediana}'
                 self.console_output.insert(tk.END, med)
             else:
                 self.console_output.insert(tk.END, "Método no reconocido")
         else:
-            print(self.identify_language(code))
+            print(self.identify_language(ultima_linea))
 
         
         self.console_output.config(state=tk.DISABLED)
@@ -160,7 +225,7 @@ class CodeInputApp:
 
     def identify_language(self, code):
         
-        expresionJulia = r'[a-zA-Z]+\s*=\s*[a-z]+\(\d+\)$|[a-z]+\([a-zA-Z]+\)$'
+        expresionJulia = r'[a-zA-Z]+\s*=\s*[a-z]+\(\d+\)$|\b([a-z]+)\(([a-zA-Z]+)\)$'
         expresionRuby = r'[a-zA-Z]+\s*=\s*[a-zA-Z]+\.[a-z]+$|[a-zA-Z]+\s*=\s*Array\.new\(\d+\)\s*\{\s*rand\s*\}$'
 
         if re.match(expresionJulia, code):
@@ -169,7 +234,6 @@ class CodeInputApp:
             return "ruby"
         else:
             return "Lenguaje no encontrado"
-        
 
     def open_file_julia(self):
         file_path = filedialog.askopenfilename(filetypes=[("Archivos Julia", "*.jl")])

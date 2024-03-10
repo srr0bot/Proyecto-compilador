@@ -1,8 +1,8 @@
 import re
 
-cadena = "A = rand(3)"
+cadena = "rand(A)"
 
-expresion_regular = r'[a-zA-Z]+\s*=\s*[a-z]+\(\d+\)'
+expresion_regular = r'\b([a-z]+)\(([a-zA-Z]+)\)$'
 
 if re.match(expresion_regular, cadena):
     print("La cadena coincide con la expresión regular")
