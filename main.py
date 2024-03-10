@@ -284,9 +284,6 @@ class CodeInputApp:
         elif re.match(expresionRuby, code):
             return "Ruby"
         else:
-            ruby_analyzer = analizadorRuby()
-            analyzed_tokens = ruby_analyzer.analyze_code(code)
-            result = f"\nTokens reconocidos:\n{analyzed_tokens}"
             return "Lenguaje no encontrado"
 
     def open_file_julia(self):
