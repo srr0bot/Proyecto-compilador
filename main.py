@@ -1,4 +1,5 @@
 import ply.lex as lex
+import ply.yacc as yacc
 import tkinter as tk
 import re
 import json
@@ -124,15 +125,15 @@ class CodeInputApp:
         self.console_output.config(state=tk.NORMAL)
         self.console_output.delete("1.0", tk.END)
         
-        semantic_analyzer = Analyzer().semanticAnalyzer(code, "Julia")
-        print(semantic_analyzer)
+        #semantic_analyzer = Analyzer().semanticAnalyzer(code, "Julia")
+        #print(semantic_analyzer)
         
         if self.identify_language(ultima_linea) == "Julia":
             
             self.console_output.insert(tk.END, f"Lenguaje: '{self.identify_language(ultima_linea)}'")
             julia_analyzer = AnalizadorJulia()
             analyzed_tokens = julia_analyzer.analyze_code(code)
-            result = f"Tokens reconocidos:\n{analyzed_tokens}"
+            result = f"\nTokens reconocidos:\n{analyzed_tokens}"
             numbers = []
             self.console_output.insert(tk.END, result)
             #self.console_output.config(state=tk.DISABLED)
